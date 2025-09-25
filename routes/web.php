@@ -1,31 +1,29 @@
 <?php
 
+use App\Http\Controllers\EventController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+// Rotas públicas
+Route::get('/', [EventController::class, 'index'])->name('events.index');
 
-use App\Http\Controllers\EventController;
-
-Route::get('/', [EventController::class, 'index']);
-Route::get('/events/create', [EventController::class, 'create'])->middleware('auth');
-Route::get('/events/{id}', [EventController::class, 'show']);
-Route::post('events', [EventController::class, 'store']);
-Route::get('/dashboard', [EventController::class, 'dashboard'])->middleware('auth');
-Route::delete('/events/{id}', [EventController::class, 'destroy'])->middleware('auth');
-Route::get('/events/edit/{id}', [EventController::class, 'edit'])->middleware('auth');
-Route::put('/events/update/{id}', [EventController::class, 'update'])->middleware('auth');
-Route::post('/events/join/{id}', [EventController::class, 'joinEvent'])->middleware('auth');
-Route::delete('/events/leave/{id}', [EventController::class, 'leaveEvent'])->middleware('auth');
-
-Route::get('/contact', function(){
-    return view('contact');
+// Rotas fixas primeiro (admin)
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
+    Route::post('/events', [EventController::class, 'store'])->name('events.store');
+    Route::get('/events/edit/{id}', [EventController::class, 'edit'])->name('events.edit');
+    Route::put('/events/update/{id}', [EventController::class, 'update'])->name('events.update');
+    Route::delete('/events/{id}', [EventController::class, 'destroy'])->name('events.destroy');
 });
+
+// Rotas públicas dinâmicas
+Route::get('/events/{id}', [EventController::class, 'show'])->name('events.show');
+
+// Área logada (não-admin)
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [EventController::class, 'dashboard'])->name('dashboard');
+    Route::post('/events/join/{id}', [EventController::class, 'joinEvent'])->name('events.join');
+    Route::delete('/events/leave/{id}', [EventController::class, 'leaveEvent'])->name('events.leave');
+});
+
+// Página aberta
+Route::get('/contact', fn() => view('contact'))->name('contact');

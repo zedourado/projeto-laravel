@@ -33,10 +33,13 @@
                         <li class="nav-item">
                             <a class="nav-link active" aria-current="page" href="/">Eventos</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/events/create">Criar Evento</a>
-                        </li>
                         @auth
+                            @if(auth()->user()->role === 'admin')
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/events/create">Criar Evento</a>
+                                </li>
+                            @endif
+                            
                         <li class="nav-item">
                             <a class="nav-link" href="/dashboard">Meus Eventos</a>
                         </li>
