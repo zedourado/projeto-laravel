@@ -23,49 +23,54 @@
     </head>
     <body>
         <header>
-        <nav class="navbar navbar-expand-lg" id="navbar">
-            <div class="container-fluid">
-                <a href="/" class="navbar-brand">
-                    <img src="/img/hdcevents_logo.svg" alt="HDC Eventos">
-                </a>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="/">Eventos</a>
-                        </li>
-                        @auth
-                            @if(auth()->user()->role === 'admin')
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/events/create">Criar Evento</a>
-                                </li>
-                            @endif
+            <nav class="navbar navbar-expand-lg" id="navbar">
+                <div class="container-fluid">
+                    <a href="/" class="navbar-brand">
+                        <img src="/img/hdcevents_logo.svg" alt="HDC Eventos">
+                    </a>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav ms-auto">
                             
-                        <li class="nav-item">
-                            <a class="nav-link" href="/dashboard">Meus Eventos</a>
-                        </li>
-                        <li class="nav-item">
-                            <form action="/logout" method="POST">
-                                @csrf
-                                <a class="nav-link" 
-                                href="/logout" 
-                                onclick="event.preventDefault();
-                                this.closest('form').submit();">Sair</a>
-                            </form>
-                        </li>
-                        @endauth
-                        @guest
-                        <li class="nav-item">
-                            <a class="nav-link" href="/login">Entrar</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/register">Cadastrar</a>
-                        </li>
-                        @endguest
-                    </ul>
-                </div>
-            </div>
-        </nav>
+                            <li class="nav-item">
+                                <a class="nav-link active" aria-current="page" href="/">Eventos</a>
+                            </li>
 
+                            @auth
+                                @if(auth()->user()->role === 'admin')
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="/events/create">Criar Evento</a>
+                                    </li>
+                                @endif
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/dashboard">Meus Eventos</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/account">Minha Conta</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <form action="/logout" method="POST">
+                                        @csrf
+                                        <a class="nav-link" href="/logout" onclick="event.preventDefault(); this.closest('form').submit();">Sair</a>
+                                    </form>
+                                </li>
+                            @endauth
+
+                            @guest
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/login">Entrar</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/register">Cadastrar</a>
+                                </li>
+                            @endguest
+
+                        </ul>
+                    </div>
+                </div>
+            </nav>
         </header>
         
         <main>

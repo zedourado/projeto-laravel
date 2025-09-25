@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\AccountController;
 use Illuminate\Support\Facades\Route;
 
 // Rotas públicas
@@ -23,6 +24,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [EventController::class, 'dashboard'])->name('dashboard');
     Route::post('/events/join/{id}', [EventController::class, 'joinEvent'])->name('events.join');
     Route::delete('/events/leave/{id}', [EventController::class, 'leaveEvent'])->name('events.leave');
+
+    // Rotas de conta do usuário
+    Route::get('/account', [AccountController::class, 'index'])->name('account.index');
+    Route::get('/account/edit', [AccountController::class, 'edit'])->name('account.edit');
+    Route::put('/account/update', [AccountController::class, 'update'])->name('account.update');
+    Route::get('/account/password', [AccountController::class, 'editPassword'])->name('account.password');
+    Route::put('/account/password', [AccountController::class, 'updatePassword'])->name('account.updatePassword');
 });
 
 // Página aberta
