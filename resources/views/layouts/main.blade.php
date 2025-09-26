@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>@yield('title')</title>
 
@@ -19,83 +20,109 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light mx-3" id="navbar">
-            <div class="container-fluid">
-                <!-- Logo -->
-                <a href="/" class="navbar-brand">
-                    <img src="/img/hdcevents_logo.svg" alt="HDC Eventos" height="40">
-                </a>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mx-3" id="navbar">
+        <div class="container-fluid">
+            <!-- Logo -->
+            <a href="/" class="navbar-brand">
+                <img src="/img/hdcevents_logo.svg" alt="HDC Eventos" height="40">
+            </a>
 
-                <!-- Botão hambúrguer para mobile -->
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
-                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+            <!-- Botão hambúrguer para mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-                <!-- Links -->
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto align-items-center">
-                        <!-- Link público -->
+            <!-- Links -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <!-- Link público -->
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">Eventos</a>
+                    </li>
+
+                    @auth
+                        <!-- Link apenas para admin -->
+                        @if(auth()->user()->role === 'admin')
+                            <li class="nav-item">
+                                <a class="nav-link" href="/events/create">Criar Evento</a>
+                            </li>
+                        @endif
+
+                        <!-- Meus Eventos -->
                         <li class="nav-item">
-                            <a class="nav-link active" href="/">Eventos</a>
+                            <a class="nav-link" href="/dashboard">Meus Eventos</a>
                         </li>
 
-                        @auth
-                            <!-- Link apenas para admin -->
-                            @if(auth()->user()->role === 'admin')
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/events/create">Criar Evento</a>
-                                </li>
-                            @endif
-
-                            <!-- Meus Eventos -->
-                            <li class="nav-item">
-                                <a class="nav-link" href="/dashboard">Meus Eventos</a>
-                            </li>
-
-                            <!-- Dropdown usuário -->
-                            <li class="nav-item dropdown d-flex align-items-center">
-                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" 
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                    @if(auth()->user()->profile_image)
-                                        <img src="/img/profiles/{{ auth()->user()->profile_image }}" 
-                                            alt="Perfil" class="rounded-circle me-2" 
-                                            style="width:35px; height:35px; object-fit:cover;">
-                                    @else
-                                        <img src="/img/profiles/avatar.png" 
-                                            alt="Perfil" class="rounded-circle me-2" 
-                                            style="width:35px; height:35px; object-fit:cover;">
-                                    @endif
-                                    <span class="d-none d-sm-inline">{{ auth()->user()->name }}</span>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                    <li><a class="dropdown-item" href="/account/edit">Editar Conta</a></li>
-                                    <li><hr class="dropdown-divider"></li>
+                        <!-- NOTIFICAÇÕES -->
+                        <li class="nav-item dropdown me-3">
+                            <a class="nav-link position-relative" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <ion-icon name="notifications-outline" style="font-size: 1.5rem;"></ion-icon>
+                                @if($unreadNotificationsCount > 0)
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notificationCount">
+                                        {{ $unreadNotificationsCount }}
+                                    </span>
+                                @endif
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="notificationsDropdown" id="notificationsDropdownMenu" style="min-width: 300px; max-height: 400px; overflow-y: auto;">
+                                @forelse($notifications as $notification)
                                     <li>
-                                        <form action="/logout" method="POST">
-                                            @csrf
-                                            <button class="dropdown-item" type="submit">Sair</button>
-                                        </form>
+                                        <div class="card p-2 mb-2 {{ $notification->read ? 'bg-light' : 'bg-white' }}" style="width: 100%; border-radius: 10px;">
+                                            <strong>{{ $notification->title }}</strong>
+                                            <p class="mb-1">{{ $notification->message }}</p>
+                                            <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
+                                        </div>
                                     </li>
-                                </ul>
-                            </li>
-                        @endauth
+                                @empty
+                                    <li>
+                                        <p class="text-center mb-0">Sem notificações</p>
+                                    </li>
+                                @endforelse
+                            </ul>
+                        </li>
 
-                        @guest
-                            <li class="nav-item">
-                                <a class="nav-link" href="/login">Entrar</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/register">Cadastrar</a>
-                            </li>
-                        @endguest
-                    </ul>
-                </div>
+                        <!-- Dropdown usuário -->
+                        <li class="nav-item dropdown d-flex align-items-center">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" 
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                                @if(auth()->user()->profile_image)
+                                    <img src="/img/profiles/{{ auth()->user()->profile_image }}" 
+                                        alt="Perfil" class="rounded-circle me-2" 
+                                        style="width:35px; height:35px; object-fit:cover;">
+                                @else
+                                    <img src="/img/profiles/avatar.png" 
+                                        alt="Perfil" class="rounded-circle me-2" 
+                                        style="width:35px; height:35px; object-fit:cover;">
+                                @endif
+                                <span class="d-none d-sm-inline">{{ auth()->user()->name }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="/account/edit">Editar Conta</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form action="/logout" method="POST">
+                                        @csrf
+                                        <button class="dropdown-item" type="submit">Sair</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    @endauth
 
+                    @guest
+                        <li class="nav-item">
+                            <a class="nav-link" href="/login">Entrar</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/register">Cadastrar</a>
+                        </li>
+                    @endguest
+                </ul>
             </div>
-        </nav>
-    </header>
+        </div>
+    </nav>
+</header>
 
 <main>
     <div class="container-fluid">
@@ -113,8 +140,7 @@
             icon: 'success',
             timer: 2000,
             showConfirmButton: false,
-            position: 'top-end',
-            toast: true
+            position: 'top-end'
         });
     </script>
     @endif

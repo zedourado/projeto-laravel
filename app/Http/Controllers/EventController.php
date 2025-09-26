@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\User;
+use App\Models\Notification;
 
 class EventController extends Controller
 {
@@ -56,6 +57,16 @@ class EventController extends Controller
         $event->user_id = $user->id;
         $event->save();
 
+        // Notificações para todos os usuários exceto o criador
+        $users = User::where('id', '!=', $user->id)->get();
+        foreach ($users as $u) {
+            Notification::create([
+                'user_id' => $u->id,
+                'title' => 'Novo Evento',
+                'message' => "O evento '{$event->title}' foi adicionado ao sistema."
+            ]);
+        }
+
         return redirect('/')->with('msg', 'Evento Cadastrado com Sucesso!');
     }
 
@@ -90,9 +101,18 @@ class EventController extends Controller
         $user = auth()->user();
         $event = Event::findOrFail($id);
 
-        // Apenas admin ou criador do evento pode deletar
         if ($user->role !== 'admin' && $user->id !== $event->user_id) {
             abort(403, 'Acesso negado');
+        }
+
+        // Notificações para participantes exceto o dono
+        $participants = $event->participants()->where('id', '!=', $user->id)->get();
+        foreach ($participants as $participant) {
+            Notification::create([
+                'user_id' => $participant->id,
+                'title' => 'Evento Cancelado',
+                'message' => "O evento '{$event->title}' foi excluído."
+            ]);
         }
 
         $event->delete();
@@ -104,7 +124,6 @@ class EventController extends Controller
         $user = auth()->user();
         $event = Event::findOrFail($id);
 
-        // Apenas admin ou criador do evento pode editar
         if ($user->role !== 'admin' && $user->id !== $event->user_id) {
             abort(403, 'Acesso negado');
         }
@@ -117,7 +136,6 @@ class EventController extends Controller
         $user = auth()->user();
         $event = Event::findOrFail($request->id);
 
-        // Apenas admin ou criador do evento pode atualizar
         if ($user->role !== 'admin' && $user->id !== $event->user_id) {
             abort(403, 'Acesso negado');
         }
@@ -133,6 +151,17 @@ class EventController extends Controller
         }
 
         $event->update($data);
+
+        // Notificações para participantes exceto o dono
+        $participants = $event->participants()->where('id', '!=', $user->id)->get();
+        foreach ($participants as $participant) {
+            Notification::create([
+                'user_id' => $participant->id,
+                'title' => 'Evento Atualizado',
+                'message' => "O evento '{$event->title}' foi atualizado."
+            ]);
+        }
+
         return redirect('/dashboard')->with('msg', 'Evento editado com sucesso!');
     }
 
@@ -142,7 +171,14 @@ class EventController extends Controller
         $user->eventsAsParticipant()->attach($id);
         $event = Event::findOrFail($id);
 
-        return redirect('/dashboard')->with('msg', 'Sua presença está confirmada no evento: ' . $event->title);
+        Notification::create([
+            'user_id' => $event->user_id,
+            'title' => 'Nova Inscrição',
+            'message' => "{$user->name} se inscreveu no seu evento '{$event->title}'."
+        ]);
+
+        return redirect('/dashboard')
+            ->with('msg', 'Sua presença está confirmada no evento: ' . $event->title);
     }
 
     public function leaveEvent($id)
@@ -150,6 +186,12 @@ class EventController extends Controller
         $user = auth()->user();
         $user->eventsAsParticipant()->detach($id);
         $event = Event::findOrFail($id);
+
+        Notification::create([
+            'user_id' => $event->user_id,
+            'title' => 'Saiu do Evento',
+            'message' => "{$user->name} removeu a sua inscrição do evento '{$event->title}'."
+        ]);
 
         return redirect('/dashboard')->with('msg', 'Você saiu com sucesso do evento: ' . $event->title);
     }

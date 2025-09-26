@@ -31,6 +31,12 @@ Route::middleware('auth')->group(function () {
     Route::put('/account/update', [AccountController::class, 'update'])->name('account.update');
     Route::get('/account/password', [AccountController::class, 'editPassword'])->name('account.password');
     Route::put('/account/password', [AccountController::class, 'updatePassword'])->name('account.updatePassword');
+
+    // Rota para notificações (AJAX)
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+
+    Route::post('/notifications/mark-as-read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->middleware('auth');
+
 });
 
 // Página aberta
