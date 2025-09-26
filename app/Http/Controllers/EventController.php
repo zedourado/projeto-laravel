@@ -12,7 +12,6 @@ class EventController extends Controller
     public function index()
     {
         $search = request('search');
-
         $events = $search
             ? Event::where('title', 'like', "%{$search}%")->get()
             : Event::all();
@@ -20,14 +19,12 @@ class EventController extends Controller
         return view('welcome', ['events' => $events, 'search' => $search]);
     }
 
-    // Apenas admin pode acessar
     public function create()
     {
         $user = auth()->user();
         if ($user->role !== 'admin') {
             abort(403, 'Acesso negado');
         }
-
         return view('events.create');
     }
 
@@ -49,7 +46,7 @@ class EventController extends Controller
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
             $requestImage = $request->image;
             $extension = $requestImage->extension();
-            $imageName = md5($requestImage->getClientOriginalName().strtotime('now')) . "." .$extension;
+            $imageName = md5($requestImage->getClientOriginalName() . strtotime('now')) . "." . $extension;
             $requestImage->move(public_path('img/events'), $imageName);
             $event->image = $imageName;
         }
@@ -106,7 +103,7 @@ class EventController extends Controller
         }
 
         // Notificações para participantes exceto o dono
-        $participants = $event->participants()->where('id', '!=', $user->id)->get();
+        $participants = $event->users()->where('id', '!=', $user->id)->get();
         foreach ($participants as $participant) {
             Notification::create([
                 'user_id' => $participant->id,
@@ -114,6 +111,9 @@ class EventController extends Controller
                 'message' => "O evento '{$event->title}' foi excluído."
             ]);
         }
+
+        // Remover relação de participantes
+        $event->users()->detach();
 
         $event->delete();
         return redirect('/dashboard')->with('msg', 'Evento excluído com sucesso!');
@@ -145,7 +145,7 @@ class EventController extends Controller
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
             $requestImage = $request->image;
             $extension = $requestImage->extension();
-            $imageName = md5($requestImage->getClientOriginalName().strtotime('now')) . "." .$extension;
+            $imageName = md5($requestImage->getClientOriginalName() . strtotime('now')) . "." . $extension;
             $requestImage->move(public_path('img/events'), $imageName);
             $data['image'] = $imageName;
         }
@@ -153,7 +153,7 @@ class EventController extends Controller
         $event->update($data);
 
         // Notificações para participantes exceto o dono
-        $participants = $event->participants()->where('id', '!=', $user->id)->get();
+        $participants = $event->users()->where('id', '!=', $user->id)->get();
         foreach ($participants as $participant) {
             Notification::create([
                 'user_id' => $participant->id,
