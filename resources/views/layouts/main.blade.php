@@ -18,7 +18,7 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light" id="navbar">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mx-3" id="navbar">
             <div class="container-fluid">
                 <!-- Logo -->
                 <a href="/" class="navbar-brand">
@@ -33,7 +33,7 @@
 
                 <!-- Links -->
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
+                    <ul class="navbar-nav ms-auto align-items-center">
                         <!-- Link público -->
                         <li class="nav-item">
                             <a class="nav-link active" href="/">Eventos</a>
@@ -53,17 +53,19 @@
                             </li>
 
                             <!-- Dropdown usuário -->
-                            <li class="nav-item dropdown">
+                            <li class="nav-item dropdown d-flex align-items-center">
                                 <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" 
-                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                data-bs-toggle="dropdown" aria-expanded="false">
                                     @if(auth()->user()->profile_image)
                                         <img src="/img/profiles/{{ auth()->user()->profile_image }}" 
-                                             alt="Perfil" class="rounded-circle me-2" style="width:35px; height:35px; object-fit:cover;">
+                                            alt="Perfil" class="rounded-circle me-2" 
+                                            style="width:35px; height:35px; object-fit:cover;">
                                     @else
                                         <img src="/img/profiles/avatar.png" 
-                                             alt="Perfil" class="rounded-circle me-2" style="width:35px; height:35px; object-fit:cover;">
+                                            alt="Perfil" class="rounded-circle me-2" 
+                                            style="width:35px; height:35px; object-fit:cover;">
                                     @endif
-                                    {{ auth()->user()->name }}
+                                    <span class="d-none d-sm-inline">{{ auth()->user()->name }}</span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                     <li><a class="dropdown-item" href="/account/edit">Editar Conta</a></li>
@@ -88,6 +90,7 @@
                         @endguest
                     </ul>
                 </div>
+
             </div>
         </nav>
     </header>
