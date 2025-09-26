@@ -15,6 +15,8 @@
 
     <!-- CSS da Aplicação -->
     <link rel="stylesheet" href="/css/styles.css">
+        <!-- CDN SWEETALERT -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <header>
@@ -95,17 +97,29 @@
         </nav>
     </header>
 
-    <main>
-        <div class="container-fluid">
-            <div class="row">
-                @if(session('msg'))
-                    <p class="msg">{{ session('msg') }}</p>
-                @endif
-
-                @yield('content')
-            </div>
+<main>
+    <div class="container-fluid">
+        <div class="row">
+            @yield('content')
         </div>
-    </main>
+    </div>
+
+    @if(session('msg'))
+    <script>
+        const msg = @json(session('msg')); // converte a mensagem de forma segura
+        Swal.fire({
+            title: 'Tudo Certo!',
+            text: msg,
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false,
+            position: 'top-end',
+            toast: true
+        });
+    </script>
+    @endif
+</main>
+
 
     <footer>
         <p>HDC Eventos &copy; 2025</p>
