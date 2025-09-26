@@ -176,6 +176,22 @@ header{
 
 }
 
+/* Em tablets (≤ 768px) */
+@media (max-width: 768px) {
+    #events-container .card {
+        flex: 1 1 48%;
+        max-width: 48%;
+    }
+}
+
+/* Em celulares (≤ 576px) */
+@media (max-width: 576px) {
+    #events-container .card {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+}
+
 /* Event show page */
 
 #image-container,
